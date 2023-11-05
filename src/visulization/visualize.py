@@ -21,7 +21,12 @@ PATH_RAW = "../../data/raw/"
 PATH_SAVE_FIGURES = "../../reports/figures/"
 
 
-def preprocess_jigsaw():
+def preprocess_jigsaw() -> pd.DataFrame:
+    """
+    open and preprocess jigsaw dataset
+
+    :return: jigsaw dataset
+    """
     df = pd.read_csv(os.path.join(PATH_EXTERNAL, 'jigsaw-train.csv'))
     df = df.drop(['severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate'], axis=1)
     df['non_toxic'] = 1 - df['toxic']
@@ -30,7 +35,12 @@ def preprocess_jigsaw():
     return df
 
 
-def plot_class_distribution_jigsaw(df):
+def plot_class_distribution_jigsaw(df: pd.DataFrame):
+    """
+    plot class distribution of the jigsaw dataset and save it
+
+    :param df: jigsaw dataset
+    """
     toxic_num = df[df['toxic'] == 1].shape[0]
     nontoxic_num = df[df['non_toxic'] == 1].shape[0]
     sns.barplot(x=['non_toxic', 'toxic'], y=[nontoxic_num, toxic_num])
@@ -39,7 +49,12 @@ def plot_class_distribution_jigsaw(df):
     plt.show()
 
 
-def print_info_jigsaw(df):
+def print_info_jigsaw(df: pd.DataFrame):
+    """
+    print into console information about jigsaw dataset
+
+    :param df: jigsaw dataset
+    """
     print()
     print(20 * "=" + "JIGSAW DATASET" + 20 * "=")
     print(df.head(), end="\n\n\n")
@@ -54,10 +69,15 @@ def print_info_jigsaw(df):
     print(df["length"].describe(), end="\n\n\n")
 
 
-def plot_wordcloud_toxic_jigsaw(train_df):
+def plot_wordcloud_toxic_jigsaw(df: pd.DataFrame):
+    """
+    plot wordcloud of toxic words of the jigsaw dataset  and save it
+
+    :param df: jigsaw dataset
+    """
     words = []
 
-    for item in train_df[train_df["toxic"] == 1].iterrows():
+    for item in df[df["toxic"] == 1].iterrows():
         deleted_punctuation = item[1]["comment_text"].translate(str.maketrans('', '', string.punctuation))
         lowercase = deleted_punctuation.lower()
         tokens = lowercase.split()
@@ -72,7 +92,12 @@ def plot_wordcloud_toxic_jigsaw(train_df):
     plt.show()
 
 
-def preprocess_paranmt():
+def preprocess_paranmt() -> pd.DataFrame:
+    """
+    open and preprocess paranmt dataset
+
+    :param df: paranmt dataset
+    """
     df = pd.read_table(PATH_RAW + 'filtered.tsv', index_col=0)
     df["avg_word_ref"] = df["reference"].str.split().str.len()
     df["avg_word_trans"] = df["translation"].str.split().str.len()
@@ -80,7 +105,12 @@ def preprocess_paranmt():
     return df
 
 
-def plot_word_numbers_in_reference_paranmt(df):
+def plot_word_numbers_in_reference_paranmt(df: pd.DataFrame):
+    """
+    plot histogram of the word numbers in 'reference' column and save it
+
+    :param df: paranmt dataset
+    """
     _ = plt.hist(np.log2(df["avg_word_ref"]), color='blue', edgecolor='black')
     plt.title('Histogram of word numbers in reference')
     plt.xlabel('$2^{Words}$')
@@ -89,7 +119,12 @@ def plot_word_numbers_in_reference_paranmt(df):
     plt.show()
 
 
-def plot_toxicity_level_reference_text_paranmt(df):
+def plot_toxicity_level_reference_text_paranmt(df: pd.DataFrame):
+    """
+    plot histogram of the toxicity level in 'reference' column and save it
+
+    :param df: paranmt dataset
+    """
     _ = plt.hist(df["ref_tox"], color='blue', edgecolor='black')
     plt.title('Histogram of toxicity level of reference text')
     plt.xlabel('level')
@@ -98,14 +133,27 @@ def plot_toxicity_level_reference_text_paranmt(df):
     plt.show()
 
 
-def swap_values_paranmt(df):
+def swap_values_paranmt(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    swap values in paranmt dataset to make it right,
+    since 'reference' column has sentences <= 0.5 toxicity level and
+    'translation' column has sentences > 0.5 toxicity level
+
+    :param df:paranmt dataset
+    :return: updated paranmt dataset
+    """
     df['ref_tox'], df['trn_tox'] = np.where(df.ref_tox > df.trn_tox,
                                             (df['ref_tox'], df['trn_tox']), (df['trn_tox'], df['ref_tox']))
 
     return df
 
 
-def plot_final_toxicity_level_reference_text_paranmt(df):
+def plot_final_toxicity_level_reference_text_paranmt(df: pd.DataFrame):
+    """
+    plot histogram of the toxicity level in 'reference' column of the updated dataset and save it
+
+    :param df: updated paranmt dataset
+    """
     _ = plt.hist(df["ref_tox"], color='blue', edgecolor='black')
     plt.title('Histogram of toxicity level of reference text')
     plt.xlabel('level')
@@ -114,7 +162,12 @@ def plot_final_toxicity_level_reference_text_paranmt(df):
     plt.show()
 
 
-def plot_wordcloud_toxic_paranmt(df):
+def plot_wordcloud_toxic_paranmt(df: pd.DataFrame):
+    """
+    plot wordcloud of toxic words of the paranmt dataset  and save it
+
+    :param df: paranmt dataset
+    """
     words = []
 
     for item in tqdm(df.iterrows()):
@@ -132,7 +185,12 @@ def plot_wordcloud_toxic_paranmt(df):
     plt.show()
 
 
-def plot_word_numbers_in_translation_paranmt(df):
+def plot_word_numbers_in_translation_paranmt(df: pd.DataFrame):
+    """
+    plot histogram of the word numbers in 'translation' column using paranmt dataset and save it
+
+    :param df: paranmt dataset
+    """
     _ = plt.hist(np.log2(df["avg_word_trans"]), color='blue', edgecolor='black')
     plt.title('Histogram of word numbers in translation')
     plt.xlabel('$2^{Words}$')
@@ -141,8 +199,13 @@ def plot_word_numbers_in_translation_paranmt(df):
     plt.show()
 
 
-def plot_toxicity_level_translation_text_paranmt(df):
-    _ = plt.hist(df["trn_tox"], color = 'blue', edgecolor = 'black')
+def plot_toxicity_level_translation_text_paranmt(df: pd.DataFrame):
+    """
+    plot histogram of the toxicity level in 'translation' column using paranmt dataset and save it
+
+    :param df: paranmt dataset
+    """
+    _ = plt.hist(df["trn_tox"], color='blue', edgecolor='black')
     plt.title('Histogram of toxicity level of translation text')
     plt.xlabel('level')
     plt.ylabel('samples')
@@ -150,8 +213,14 @@ def plot_toxicity_level_translation_text_paranmt(df):
     plt.show()
 
 
-def plot_similarity_level_paranmt(df):
-    _ = plt.hist(df["similarity"], color = 'blue', edgecolor = 'black')
+def plot_similarity_level_paranmt(df: pd.DataFrame):
+    """
+    plot histogram of the similarity level between 'translation' and
+    'reference' columns using paranmt dataset and save it
+
+    :param df: paranmt dataset
+    """
+    _ = plt.hist(df["similarity"], color='blue', edgecolor='black')
     plt.title('Histogram of similarity level between reference and translation columns.')
     plt.xlabel('level')
     plt.ylabel('samples')
@@ -159,8 +228,14 @@ def plot_similarity_level_paranmt(df):
     plt.show()
 
 
-def plot_length_difference_paranmt(df):
-    _ = plt.hist(df["lenght_diff"], color = 'blue', edgecolor = 'black')
+def plot_length_difference_paranmt(df: pd.DataFrame):
+    """
+    plot histogram of the length difference between 'translation' and
+    'reference' column using paranmt dataset and save it
+
+    :param df: paranmt dataset
+    """
+    _ = plt.hist(df["lenght_diff"], color='blue', edgecolor='black')
     plt.title('Histogram of length difference number between reference and translation columns.')
     plt.xlabel('level')
     plt.ylabel('samples')
@@ -168,7 +243,13 @@ def plot_length_difference_paranmt(df):
     plt.show()
 
 
-def print_info_paranmt(old_df, new_df):
+def print_info_paranmt(old_df: pd.DataFrame, new_df: pd.DataFrame):
+    """
+    print into console information about paranmt dataset
+
+    :param old_df: dataset before updating
+    :param new_df: dataset after updating
+    """
     print()
     print(20 * "=" + "PARANMT DATASET" + 20 * "=")
     print(old_df.head(), end="\n\n\n")
