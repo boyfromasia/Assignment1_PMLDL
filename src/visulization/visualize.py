@@ -31,6 +31,7 @@ def preprocess_jigsaw() -> pd.DataFrame:
     df = df.drop(['severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate'], axis=1)
     df['non_toxic'] = 1 - df['toxic']
     df["length"] = df["comment_text"].str.split().apply(len)
+    df["avg_word"] = df["comment_text"].str.split().str.len()
 
     return df
 
@@ -49,6 +50,20 @@ def plot_class_distribution_jigsaw(df: pd.DataFrame):
     plt.show()
 
 
+def plot_word_numbers_jigsaw(df: pd.DataFrame):
+    """
+    plot histogram of the word numbers using jigsaw dataset and save it
+
+    :param df: jigsaw dataset
+    """
+    _ = plt.hist(np.log2(df["avg_word"]), color = 'blue', edgecolor = 'black')
+    plt.title('Histogram of word numbers in comment text')
+    plt.xlabel('$2^{Words}$')
+    plt.ylabel('samples')
+    plt.savefig(PATH_SAVE_FIGURES + "word_numbers_jigsaw.png")
+    plt.show()
+
+
 def print_info_jigsaw(df: pd.DataFrame):
     """
     print into console information about jigsaw dataset
@@ -60,13 +75,18 @@ def print_info_jigsaw(df: pd.DataFrame):
     print(df.head(), end="\n\n\n")
     print("Dataset size:", df.shape)
     print("Columns:", df.columns.tolist())
+
     toxic_num = df[df['toxic'] == 1].shape[0]
     nontoxic_num = df[df['non_toxic'] == 1].shape[0]
+
     print("Number of nontoxic comments", nontoxic_num / toxic_num, "time greater then number of toxic samples",
           end="\n\n")
 
     print("Some information about length of JIGSAW dataset.")
     print(df["length"].describe(), end="\n\n\n")
+
+    print("Base information about word number of the sentence.")
+    print(df["avg_word"].describe(), end="\n\n\n")
 
 
 def plot_wordcloud_toxic_jigsaw(df: pd.DataFrame):
@@ -286,6 +306,7 @@ def print_info_paranmt(old_df: pd.DataFrame, new_df: pd.DataFrame):
 if __name__ == "__main__":
     jigsaw = preprocess_jigsaw()
     plot_class_distribution_jigsaw(jigsaw)
+    plot_word_numbers_jigsaw(jigsaw)
     plot_wordcloud_toxic_jigsaw(jigsaw)
     print_info_jigsaw(jigsaw)
 
